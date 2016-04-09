@@ -1,0 +1,152 @@
+<section>
+      VmInclude:__BASE__/vmiis/Common-Code/frame/excel_v2.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__BASE__/vmiis/Common-Code/frame/excel_v2.js
+        VmInclude:__BASE__/vmiis/Common-Code/style/ease-in-out.js
+        //-------------------------------------
+        _fields="Request ID|PUID,Description,GST,Price,Qty,Sub_Total";
+        _fields+=",Submit Date|DateTime,Submitted by|Author";
+        //-------------------------------------
+        var parent_pid=$vm.module_list['reimbursement_request'][0];
+        //-------------------------------------
+        $('#D__ID').on('load',function(){  _set_req(); _request_data(); })
+        //-------------------------------------
+        _columns_process=function(columns){
+            columns[0]={data:'PUID', readOnly:true};
+            columns[2]={data:'GST',width:36,renderer:function(instance, td, row, col, prop, value, cellProperties){
+                if(value==="on" || value=="1" || value===true) $(td).html("<input type=checkbox checked />");
+                else $(td).html("<input type=checkbox />");
+                $(td).find('input[type=checkbox]').change(function(){
+                    var hot=$('#excel__ID').handsontable('getInstance');
+                    hot.setDataAtCell(row,col,this.checked,'');
+                    var gst=0;  if(this.checked===true) gst=1;
+                    price=_records[row].Price;
+                    qty=_records[row].Qty;
+                    //var r=price*qty*(1+0.1*gst);
+                    var r=price*qty;
+                    if(isNaN(r)!==true) hot.setDataAtCell(row, 5, r.toFixed(2),'');
+                });
+            }};
+            columns[3]={data:'Price',type:'numeric',format:'$ 0,000.00'};
+            columns[4]={data:'Qty',type:'numeric',format:'0'};
+            columns[5]={data:'Sub_Total',readOnly:true,type:'numeric',format:'$ 0,000.00'};
+        }
+        //-------------------------------------
+        _before_submit=function(record,dbv){
+            var puid=record.PUID;
+            if(puid===null || puid===undefined) puid=$vm.vm['__ID'].op.puid;
+            if(puid===null || puid===undefined){
+                alert("No parent");
+                return false;
+            }
+            var v;
+            dbv.V1='0'; v=record.Sub_Total; if(v!=='') dbv.V1=v.toFixed(2);
+            dbv.V2='0'; v=record.Qty;       if(v!=='') dbv.V2=v;
+            dbv.V3='0'; v=record.Price;     if(v!=='') dbv.V3=v;
+            dbv.S1=record.Item_Code;
+            dbv.B1='0'; if(record.GST===true) dbv.B1='1';
+            dbv.PPID=parent_pid;
+            dbv.PUID=puid;
+
+            jQuery.ajaxSetup({async:false});
+            var req_data={cmd:"modify_record_by_ppid_and_puid",ppid:parent_pid,puid:puid,data:{GST_Amount:'-1',Total_Amount:'-1'},dbv:{V1:'-1',V2:'-1'} };
+            $VmAPI.request({data:req_data,callback:function(res){}});
+            jQuery.ajaxSetup({async:true});
+
+            return true;
+        };
+        //-------------------------------------
+        _after_submit=function(I,res,n,dbv){
+            var record=_records[I];
+            var puid=record.PUID;
+            if(puid===null || puid===undefined) puid=$vm.vm['__ID'].op.puid;
+            if(puid===null || puid===undefined){
+                alert("No parent");
+                return false;
+            }
+            jQuery.ajaxSetup({async:false});
+            var sql="with tb as (select V1, GST=case when B1=1 then V1/11 else 0 end,PUID from [TABLE-"+_db_pid+"] where PUID ="+puid+") ";
+            sql+="select Total=Sum(V1),GST=Sum(GST), PUID from tb group by PUID";
+            var req_data={cmd:'query_records',sql:sql};
+            $VmAPI.request({data:req_data,callback:function(res){
+                var Total=res.records[0].Total;
+                var GST=res.records[0].GST;
+                req_data={cmd:"modify_record_by_ppid_and_puid",ppid:parent_pid,puid:puid,data:{GST_Amount:GST,Total_Amount:Total},dbv:{V1:Total,V2:GST} };
+                $VmAPI.request({data:req_data,callback:function(res){}});
+            }});
+            jQuery.ajaxSetup({async:true});
+        };
+        //-------------------------------------
+        _before_change=function(changes,source){
+            if(source=="edit"){
+                var I=changes[0][0];
+                var p=changes[0][1];
+                var v=changes[0][3];
+                var hot = $('#excel__ID').handsontable('getInstance');
+                var price,qty,gst,r;
+                if(p==='GST'){
+                    //not work here, see GST render
+                    /*
+                    if(v===true) gst=1; else gst=0;
+                    price=_records[I].Price;
+                    qty=_records[I].Qty;
+                    //r=price*qty*(1+0.1*gst);
+                    r=price*qty;
+                    if(isNaN(r)!==true) hot.setDataAtCell(I, 5, r.toFixed(2),'');
+                    */
+                }
+                if(p==='Price'){
+                    if(_records[I].GST===true) gst=1; else gst=0;
+                    price=v;
+                    qty=_records[I].Qty;
+                    //r=price*qty*(1+0.1*gst);
+                    r=price*qty;
+                    if(isNaN(r)!==true) hot.setDataAtCell(I, 5, r.toFixed(2),'');
+                }
+                if(p==='Qty'){
+                    if(_records[I].GST===true) gst=1; else gst=0;
+                    price=_records[I].Price;
+                    qty=v;
+                    //r=price*qty*(1+0.1*gst);
+                    r=price*qty;
+                    if(isNaN(r)!==true) hot.setDataAtCell(I, 5, r.toFixed(2),'');
+                }
+    	    }
+        };
+        //-------------------------------------
+        _pre_data_process=function (){
+            for(var i=0;i<_records.length;i++){
+                _records[i].GST=_to_true_and_false(_records[i].GST);
+                var gst=0; if(_records[i].GST===true) gst=1;
+                var price=_records[i].Price;
+                var qty=_records[i].Qty;
+                //_records[i].Sub_Total=(price*qty*(1+0.1*gst)).toFixed(2);
+                _records[i].Sub_Total=(price*qty).toFixed(2);
+            }
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+            var puid=$vm.vm['__ID'].op.puid;
+            $("#excel__ID").handsontable("setDataAtCell", 0, 0, puid);
+        };
+        //-------------------------------------
+        _set_req=function(){
+            //-------------------
+            $('#new__ID').hide();
+            $('#save__ID').hide();
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                $('#new__ID').show();
+                $('#save__ID').show();
+            }
+            //-------------------
+            _set_req_with_sql_where();
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__BASE__/vmiis/Common-Code/style/default.css
+</style>

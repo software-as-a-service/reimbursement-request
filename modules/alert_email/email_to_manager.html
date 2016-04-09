@@ -1,0 +1,73 @@
+<section>
+    <div id=toolbar__ID>
+          <a id=back__ID>Back</a><span class=tab__ID></span>Alert email
+    </div>
+    <div style='padding:30px'>
+        Select a manager to alert: <select id=list__ID></select>
+        <br><br>
+        <div id=contents__ID>
+            Dear <span id=manager__ID></span>,<br>
+            Thers is a new reimbursement request needs to be approved.
+            <br>
+            <br>Request ID: <span id=request_id__ID></span>
+            <br>Requester: <span id=requester__ID></span>
+            <br><br>
+            <br>Best Regards,
+            <br>Database Administrator
+        </div>
+        <br><br>
+        <input type=button id=send__ID value=Sent />
+    </div>
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__BASE__/vmiis/Common-Code/toolbar/back.js
+        VmInclude:__BASE__/vmiis/Common-Code/style/ease-in-out.js
+        //-------------------------------------
+        $('#D__ID').on('load',function(){
+            var list_pid=$vm.module_list['email_list_managers'][0];
+            var sql="select top 1 A=@('List') from [TABLE-"+list_pid+"]";
+            var req={cmd:'query_records',sql:sql}
+            $VmAPI.request({data:req,callback:function(res){
+                if(res.records.length>0){
+                    var lines=res.records[0].A.replace(/\r/g,'\n').replace(/\n\n/g,'\n').replace(/\n/g,',').split(',');
+                    var txt="";
+                    for(var i=0;i<lines.length;i++){
+                        var a=lines[i].split(':')[0];
+                        var v=lines[i].split(':').pop();
+                        txt+="<option value="+v+">"+a+"</option>";
+                    }
+                    $('#list__ID').html(txt);
+                }
+            }})
+            $('#requester__ID').text(g_user);
+            $('#request_id__ID').text($vm.vm['__ID'].op.request_id);
+        })
+        //-------------------------------------
+        $('#list__ID').on('change',function(){
+            var id=$(this).attr('id');
+            var nm=$('#'+id+' option:selected').text();
+            $('#manager__ID').text(nm);
+        });
+        //-------------------------------------
+        $('#send__ID').on('click',function(){
+     	   	var From_Address="noresponse@company.com";
+     		var From_Name="Database Administrator";
+     		var To=$('#list__ID').val();
+            if(To.length<5){
+                alert('No email address selected.')
+                return;
+            }
+     		var Title="New reimbursement request";
+     		var Body=$('#contents__ID').html();
+            $VmAPI.request({data:{cmd:'send_email',From_Address:From_Address,From_Name:From_Name,To:To,Title:Title,Body:Body},callback:function(res){
+                alert('The alert email (to: '+$('#list__ID').val()+') has been sent out');
+            }})
+        });
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__BASE__/vmiis/Common-Code/style/default.css
+</style>

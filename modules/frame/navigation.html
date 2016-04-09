@@ -1,0 +1,58 @@
+<section>
+    <div id=toolbar__ID>
+        <a id=back__ID>Back</a><span class=tab__ID></span>Reimbursement Request
+    </div>
+    <div style='clear:left;'>
+        <div class='nav__ID'>
+            <span>Reimbursement Request</span>
+            <ul>
+                <li data-name=reimbursement_request>Reimbursement Request</li>
+            </ul>
+            <br>
+            <span>Reimbursement Request Child Records</span>
+            <ul>
+                <li data-name=reimbursement_request_item>Items of reimbursement request</li>
+                <li data-name=reimbursement_request_file>Supporting files of reimbursement</li>
+            </ul>
+            <br>
+        </div>
+        <div class='nav__ID'>
+            <span>Setup</span>
+            <ul>
+                <li data-name=email_list_managers>Alert email list - managers</li>
+                <li data-name=email_list_accountants>Alert email list - accountants</li>
+            </ul>
+        </div>
+    </div>
+    <div style='padding:30px;font-size:9px;color:#888;width:500px'>
+        <b>How to submit a reimbursement request?</b> Click 'Reimbursement Request', click 'New', fill information and save.
+        Click 'Items' for adding items. Click Files for uploading supporting files.
+        Finnaly click 'Alert' for sending an alert email to your manager for approving.
+
+        <br><br>
+        <b>How to approve a reimbursement request?</b>
+        Click 'Reimbursement Request', find the request, click 'Approving', tick the check box and save.
+        Finnaly click 'Alert' for sending an alert email to an accountant for processing.
+
+        <br><br>
+        <b>How to process a reimbursement request?</b>
+        Click 'Reimbursement Request', find the request, click 'Processing', tick the check box and save.
+        Finnaly click 'Alert' for sending an alert email to the requester.
+    </div>
+</section>
+<script>
+    function F__ID(){
+        //---------------------------------------------
+        var content_slot=$vm.root_layout_content_slot;
+        VmInclude:__BASE__/vmiis/Common-Code/navigation/navigation.js
+        VmInclude:__BASE__/vmiis/Common-Code/style/ease-in-out.js
+        //---------------------------------------------
+        $('#D__ID').on('load',function(){
+            _set_permissions();
+        });
+        //---------------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__BASE__/vmiis/Common-Code/navigation/navigation.css
+</style>

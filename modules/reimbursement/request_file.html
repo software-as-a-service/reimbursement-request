@@ -1,0 +1,80 @@
+<section>
+      VmInclude:__BASE__/vmiis/Common-Code/frame/excel_v2.html
+</section>
+<script>
+    function F__ID(){
+        //-------------------------------------
+        VmInclude:__BASE__/vmiis/Common-Code/frame/excel_v2.js
+        VmInclude:__BASE__/vmiis/Common-Code/style/ease-in-out.js
+        //-------------------------------------
+        _fields="Request ID|PUID,Choose|UID,Document,Last Modified|lastModified,Size,Description";
+        _fields+=",Submit Date|DateTime,Submitted by|Author";
+        //-------------------------------------
+        $('#D__ID').on('load',function(){  _set_req(); _request_data(); })
+        //-------------------------------------
+        _columns_process=function(columns){
+            columns[0]={data:'PUID', readOnly:true};
+            columns[1]={data:'Choose',width:100, renderer:function(instance, td, row, col, prop, value, cellProperties){
+                if( $(td).html()!=="") return td;
+                $(this).vm8('set_file_input',td,function(file){
+        			var ddd=date_to_string_dmy(new Date(file.lastModified));
+        			_records[row].Document=file.name;
+        			_records[row].Size=file.size;
+        			_records[row].lastModified=ddd;
+                    _records[row].dirty=1;
+        			$("#excel__ID").handsontable("setDataAtCell", row, col+1, file.name);
+        			$("#excel__ID").handsontable("setDataAtCell", row, col+2, ddd);
+        			$("#excel__ID").handsontable("setDataAtCell", row, col+3, file.size);
+                });
+        		//--------------------------------------
+                return td;
+            }};
+            //-------------------------------------
+            columns[2]={data:'Document',width:200,readOnly:true,renderer:function(instance, td, row, col, prop, value, cellProperties){
+                if(_records[row]!==undefined){
+                    $vm.file_link({td:td,rid:_records[row].ID,value:value});
+                }
+                return td;
+            }};
+            //-------------------------------------
+            columns[3]={data:'lastModified',readOnly:true};
+            //-------------------------------------
+            columns[4]={data:'Size',readOnly:true};
+            //-------------------------------------
+        }
+        //-------------------------------------
+        var before_submit=function(record,dbv){
+            var parent_pid=$vm.module_list['reimbursement_request'][0];
+            var puid=record.PUID;
+            if(puid===null || puid===undefined) puid=$vm.vm['__ID'].op.puid;
+            if(puid===null || puid===undefined){
+                alert("No parent");
+                return false;
+            }
+    		dbv.PPID=parent_pid;
+    		dbv.PUID=puid;
+            return true;
+        };
+        //-------------------------------------
+        _new_pre_data_process=function(){
+            var puid=$vm.vm['__ID'].op.puid;
+            $("#excel__ID").handsontable("setDataAtCell", 0, 0, puid);
+        };
+        //-------------------------------------
+        _set_req=function(){
+            //-------------------
+            $('#new__ID').hide();
+            $('#save__ID').hide();
+            if($vm.vm['__ID'].op.sql_where!==undefined){
+                $('#new__ID').show();
+                $('#save__ID').show();
+            }
+            //-------------------
+            _set_req_with_sql_where();
+        }
+        //-------------------------------------
+    }
+</script>
+<style>
+    VmInclude:__BASE__/vmiis/Common-Code/style/default.css
+</style>
