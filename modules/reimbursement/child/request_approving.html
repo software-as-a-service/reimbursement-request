@@ -7,7 +7,7 @@
         VmInclude:__BASE__/vmiis/Common-Code/frame/excel_v2.js
         VmInclude:__BASE__/vmiis/Common-Code/style/ease-in-out.js
         //-------------------------------------
-        _fields="Request ID|PUID,Process,Signature,Alert";
+        _fields="Request ID|PUID,Approve,Signature,Alert";
         _fields+=",Submit Date|DateTime,Submitted by|Author";
         //-------------------------------------
         $('#D__ID').on('load',function(){  _set_req(); _request_data(); })
@@ -15,7 +15,7 @@
         _columns_process=function(columns){
             columns[0]={data:'PUID', readOnly:true};
             //-------------------------------------
-            columns[1]={data:'Process',width:65, renderer:function(instance, td, row, col, prop, value, cellProperties){
+            columns[1]={data:'Approve',width:65, renderer:function(instance, td, row, col, prop, value, cellProperties){
                 if(value!==true && value!==false){
                     if(value==="True") value=true;
                     else if(value==='1') value=true;
@@ -36,12 +36,14 @@
             columns[2]={data:'Signature', readOnly:true,width:500};
             //-------------------------------------
             columns[3]={data:'UID', renderer:function(instance, td, row, col, prop, value, cellProperties){
+                if(_records[row]===undefined) return td
                 $(td).html("<u style='cursor:pointer'>Alert</u>");
                 $(td).find('u').data('uid',_records[row].PUID);
                 $(td).find('u').on('click',function(){
                     var uid=$(this).data("uid");
-                    $vm.load_module_by_name('email_to_requester',$vm.root_layout_content_slot,{request_id:uid});
+                    $vm.load_module_by_name('email_to_accountant',$vm.root_layout_content_slot,{request_id:uid});
                 });
+                return td;
             }};
             //-------------------------------------
         }
@@ -58,12 +60,12 @@
     		dbv.PUID=puid;
             dbv.DT1=date_to_string_dmy(date_today());
             dbv.S1=record.Signature;
-            dbv.V1=0; if(record.Process===true) dbv.V1=1;
+            dbv.V1=0; if(record.Approve===true) dbv.V1=1;
             dbv.LOCK='1';
             return true;
         };
         //-------------------------------------
-        _records_process=function(){
+        _data_process=function(){
             if(_records.length===0) $('#new__ID').triggerHandler('click');
         }
         //-------------------------------------
@@ -91,7 +93,7 @@
         //-------------------------------------
         _after_submit=function(I,res,n){
             var prid=$vm.vm['__ID'].op.prid;
-            if(_records[I].Process===true)  $vm.lock({rid:prid});
+            if(_records[I].Approve===true)  $vm.lock({rid:prid});
             else                            $vm.unlock({rid:prid});
         };
         //-------------------------------------

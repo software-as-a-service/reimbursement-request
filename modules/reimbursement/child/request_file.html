@@ -43,7 +43,7 @@
             //-------------------------------------
         }
         //-------------------------------------
-        var before_submit=function(record,dbv){
+        _before_submit=function(record,dbv){
             var parent_pid=$vm.module_list['reimbursement_request'][0];
             var puid=record.PUID;
             if(puid===null || puid===undefined) puid=$vm.vm['__ID'].op.puid;

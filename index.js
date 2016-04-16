@@ -4,10 +4,10 @@ $vm.module_list={
     navigation:                  ['--------','.../modules/frame/navigation.html','2'],
 
     reimbursement_request:              ['20007572','.../modules/reimbursement/request.html','2'],
-    reimbursement_request_item:         ['20007573','.../modules/reimbursement/request_item.html','2'],
-    reimbursement_request_file:         ['20007574','.../modules/reimbursement/request_file.html','2'],
-    reimbursement_request_approving:    ['20007575','.../modules/reimbursement/request_approving.html','2'],
-    reimbursement_request_processing:   ['20007576','.../modules/reimbursement/request_processing.html','2'],
+    reimbursement_request_item:         ['20007573','.../modules/reimbursement/child/request_item.html','2'],
+    reimbursement_request_file:         ['20007574','.../modules/reimbursement/child/request_file.html','2'],
+    reimbursement_request_approving:    ['20007575','.../modules/reimbursement/child/request_approving.html','2'],
+    reimbursement_request_processing:   ['20007576','.../modules/reimbursement/child/request_processing.html','2'],
 
     email_list_managers:                ['20007517','.../modules/setup/email_list_managers.html','2'],
     email_list_accountants:             ['20007518','.../modules/setup/email_list_accountants.html','2'],

@@ -43,7 +43,7 @@
                 return false;
             }
             var v;
-            dbv.V1='0'; v=record.Sub_Total; if(v!=='') dbv.V1=v.toFixed(2);
+            dbv.V1='0'; v=record.Sub_Total; if(v!=='') dbv.V1=parseFloat(v).toFixed(2);
             dbv.V2='0'; v=record.Qty;       if(v!=='') dbv.V2=v;
             dbv.V3='0'; v=record.Price;     if(v!=='') dbv.V3=v;
             dbv.S1=record.Item_Code;
@@ -137,7 +137,7 @@
             //-------------------
             $('#new__ID').hide();
             $('#save__ID').hide();
-            if($vm.vm['__ID'].op.sql_where!==undefined){
+            if($vm.vm['__ID'].op.sql_where!==undefined && $vm.vm['__ID'].op.sql_where!==""){
                 $('#new__ID').show();
                 $('#save__ID').show();
             }
